@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
-from app.router import auth, crime, vote
+from app.router import auth, crime, vote, subscription
 from .database import create_db_and_tables
 
 @asynccontextmanager
@@ -23,5 +23,6 @@ async def home():
 app.include_router(auth.router)
 app.include_router(crime.router)
 app.include_router(vote.router)
+app.include_router(subscription.router)
 
 

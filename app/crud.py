@@ -106,7 +106,37 @@ def create_anonymous_vote(db: Session, crime_id: int, vote: schemas.VoteRequest,
     return new_vote
 
 
+def get_subscription_by_user(db: Session, user_id: int):
+    return db.query(models.Subscription).filter(models.Subscription.user_id == user_id).first()
 
+def create_subscription(db: Session, user_id: int, sub: schemas.SubscriptionCreate):
+    db_sub = models.Subscription(
+        user_id=user_id,
+        latitude=sub.latitude,
+        longitude=sub.longitude,
+        radius=sub.radius,
+        is_active=sub.is_active if sub.is_active is not None else True,
+        created_at=datetime.utcnow()
+    )
+    db.add(db_sub)
+    db.commit()
+    db.refresh(db_sub)
+    return db_sub
+
+def update_subscription(db: Session, db_sub: models.Subscription, sub: schemas.SubscriptionCreate):
+    db_sub.latitude = sub.latitude
+    db_sub.longitude = sub.longitude
+    db_sub.radius = sub.radius
+    db_sub.is_active = sub.is_active if sub.is_active is not None else db_sub.is_active
+    db.commit()
+    db.refresh(db_sub)
+    return db_sub
+
+def upsert_subscription(db: Session, user_id: int, sub: schemas.SubscriptionCreate):
+    existing = get_subscription_by_user(db, user_id)
+    if existing:
+        return update_subscription(db, existing, sub)
+    return create_subscription(db, user_id, sub)
     
 
 
