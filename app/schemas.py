@@ -7,9 +7,12 @@ class UserRole(str, Enum):
     USER = "user"
     ADMIN = "admin"
 
+class VoteEnum(str, Enum):
+    up = "up"
+    down = "down"
 
 class UserBase(BaseModel):
-    user_id: int
+    # user_id: int
     username: str
     email: EmailStr
 
@@ -75,18 +78,17 @@ class CrimeUpdate(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
-class VoteBase(BaseModel):
+    
+class VoteRequest(BaseModel):
+    vote_type: VoteEnum
+
+
+
+class VoteResponse(BaseModel):
+    vote_id: Optional[int] = None
+    user_id: Optional[int] = None
     crime_id: int
     vote_type: str
-
-
-class VoteCreate(VoteBase):
-    pass
-
-
-class VoteResponse(VoteBase):
-    vote_id: int
-    user_id: int
     created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)

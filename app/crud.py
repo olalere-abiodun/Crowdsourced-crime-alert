@@ -55,6 +55,56 @@ def create_crime(db: Session, user_id: int, crime: schemas.CrimeCreate):
 def get_crime_by_id(db: Session, crime_id: int):
     return db.query(models.Crimes).filter(models.Crimes.crime_id == crime_id).first()
 
+# create a vote
+from fastapi import HTTPException, status
+
+def create_vote(db: Session, crime_id: int, user_id: int, vote: schemas.VoteRequest):
+    # Check if user already voted for this crime
+    existing_vote = db.query(models.Votes).filter_by(
+        crime_id=crime_id, user_id=user_id
+    ).first()
+
+    if existing_vote:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="You have already voted on this crime"
+        )
+
+    new_vote = models.Votes(
+        crime_id=crime_id,
+        user_id=user_id,
+        vote_type=vote.vote_type
+    )
+    db.add(new_vote)
+    db.commit()
+    db.refresh(new_vote)
+    return new_vote
+
+
+from fastapi import HTTPException, status
+
+def create_anonymous_vote(db: Session, crime_id: int, vote: schemas.VoteRequest, ip_address: str):
+    # Check if this IP already voted on this crime
+    existing_vote = db.query(models.AnonymousVotes).filter_by(
+        crime_id=crime_id, ip_address=ip_address
+    ).first()
+
+    if existing_vote:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="You have already voted on this crime anonymously"
+        )
+
+    new_vote = models.AnonymousVotes(
+        crime_id=crime_id,
+        ip_address=ip_address,
+        vote_type=vote.vote_type
+    )
+    db.add(new_vote)
+    db.commit()
+    db.refresh(new_vote)
+    return new_vote
+
 
 
     

@@ -35,6 +35,7 @@ class Crimes(Base):
 
     user = relationship("Users", back_populates="crimes")
     votes = relationship("Votes", back_populates="crime")
+    anonymous_votes = relationship("AnonymousVotes", back_populates="crime")
 
 
 class Votes(Base):
@@ -52,6 +53,23 @@ class Votes(Base):
 
     user = relationship("Users", back_populates="votes")
     crime = relationship("Crimes", back_populates="votes")
+
+
+class AnonymousVotes(Base):
+    __tablename__ = "anonymous_votes"
+
+    vote_id = Column(Integer, primary_key=True, autoincrement=True)
+    crime_id = Column(Integer, ForeignKey("crimes.crime_id"), nullable=False)
+    ip_address = Column(String, nullable=False)
+    vote_type = Column(String, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    
+
+    __table_args__ = (
+        UniqueConstraint("crime_id", "ip_address", name="unique_anon_vote"),
+    )
+
+    crime = relationship("Crimes", back_populates="anonymous_votes")
 
 
 class Subscription(Base):
