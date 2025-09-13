@@ -163,7 +163,7 @@ def get_flagged_crimes(db: Session):
 
 # create SOS alert
 def create_sos_alert(db: Session, user_id: int, sos: schemas.SOSCreate):
-    db_sos = models.SOSAlert(
+    db_sos = models.SOSAlerts(
         user_id=user_id,
         latitude=sos.latitude,
         longitude=sos.longitude,
@@ -173,3 +173,6 @@ def create_sos_alert(db: Session, user_id: int, sos: schemas.SOSCreate):
     db.commit()
     db.refresh(db_sos)
     return db_sos
+
+def get_all_sos_alerts(db: Session):
+    return db.query(models.SOSAlerts).all()

@@ -18,6 +18,8 @@ class Users(Base):
     crimes = relationship("Crimes", back_populates="user")
     votes = relationship("Votes", back_populates="user")
     subscriptions = relationship("Subscription", back_populates="user")
+    sos_alerts = relationship("SOSAlerts", back_populates="user", cascade="all, delete-orphan")
+    flagged_crimes = relationship("FlaggedCrime", back_populates="admin")
 
 
 class Crimes(Base):
@@ -99,3 +101,16 @@ class FlaggedCrime(Base):
     # relationships
     crime = relationship("Crimes", back_populates="flags")
     admin = relationship("Users", back_populates="crimes")
+    
+
+class SOSAlerts(Base):
+    __tablename__ = "sos_alerts"
+
+    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    user_id = Column(Integer, ForeignKey("users.user_id"), nullable=True)  # Nullable for anonymous alerts
+    message = Column(String, nullable=False)
+    latitude = Column(Float, nullable=False)
+    longitude = Column(Float, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    user = relationship("Users", back_populates="sos_alerts")

@@ -132,3 +132,23 @@ class FlaggedCrimeOut(FlaggedCrimeBase):
 
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class SOSBase(BaseModel):
+    message: str
+    latitude: float
+    longitude: float  
+
+
+# --- Create Schema (User input) ---
+class SOSCreate(SOSBase):
+    pass
+
+
+# --- Response Schema (DB output) ---
+class SOSResponse(SOSBase):
+    id: int
+    user_id: int
+    created_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)
