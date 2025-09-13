@@ -34,8 +34,9 @@ class Crimes(Base):
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     user = relationship("Users", back_populates="crimes")
-    votes = relationship("Votes", back_populates="crime")
-    anonymous_votes = relationship("AnonymousVotes", back_populates="crime")
+    votes = relationship("Votes", back_populates="crime", cascade="all, delete-orphan")
+    anonymous_votes = relationship("AnonymousVotes", back_populates="crime", cascade="all, delete-orphan")
+    flags = relationship("FlaggedCrime", back_populates="crime", cascade="all, delete-orphan")
 
 
 class Votes(Base):
@@ -59,7 +60,7 @@ class AnonymousVotes(Base):
     __tablename__ = "anonymous_votes"
 
     vote_id = Column(Integer, primary_key=True, autoincrement=True)
-    crime_id = Column(Integer, ForeignKey("crimes.crime_id"), nullable=False)
+    crime_id = Column(Integer, ForeignKey("crimes.crime_id", ondelete="CASCADE"), nullable=False)
     ip_address = Column(String, nullable=False)
     vote_type = Column(String, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
@@ -84,3 +85,17 @@ class Subscription(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
 
     user = relationship("Users", back_populates="subscriptions")
+
+class FlaggedCrime(Base):
+    __tablename__ = "flagged_crimes"
+
+    id = Column(Integer, primary_key=True, index=True)
+    crime_id = Column(Integer, ForeignKey("crimes.crime_id"), nullable=False)
+    flagged_by = Column(Integer, ForeignKey("users.user_id"))
+    reason = Column(String, default="No reason provided")
+    is_flagged = Column(Boolean, default=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    # relationships
+    crime = relationship("Crimes", back_populates="flags")
+    admin = relationship("Users", back_populates="crimes")

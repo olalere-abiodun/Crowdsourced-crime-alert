@@ -34,6 +34,11 @@ def create_crime(
             detail="User not authenticated",
             headers={"WWW-Authenticate": "Bearer"},
         )
+    if current_user.role != "user":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only users with role 'user' can create crimes",
+        )
     try: 
         new_crime = crud.create_crime(db, current_user.user_id, crime)
         return {"message": "Crime created successfully", "crime": [new_crime]}

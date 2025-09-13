@@ -56,3 +56,25 @@ def subscribe_alert(
         raise HTTPException(status_code=500, detail=str(e))
 
     return sub_obj
+
+
+@router.get("/subscribe", response_model=schemas.SubscriptionResponse)
+def get_subscription(
+    db: Session = Depends(get_db),
+    current_user: schemas.UserBase = Depends(auth_utils.get_current_user)
+):
+    """
+    Get the current user's subscription details.
+    """
+    # require authentication
+    if not current_user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Authentication required to view subscription"
+        )
+
+    sub_obj = crud.get_subscription_by_user(db, current_user.user_id)
+    if not sub_obj:
+        raise HTTPException(status_code=404, detail="No subscription found for the user")
+
+    return sub_obj

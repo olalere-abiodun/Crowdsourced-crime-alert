@@ -115,8 +115,7 @@ def create_subscription(db: Session, user_id: int, sub: schemas.SubscriptionCrea
         latitude=sub.latitude,
         longitude=sub.longitude,
         radius=sub.radius,
-        is_active=sub.is_active if sub.is_active is not None else True,
-        created_at=datetime.utcnow()
+        is_active=sub.is_active if sub.is_active is not None else True
     )
     db.add(db_sub)
     db.commit()
@@ -139,4 +138,38 @@ def upsert_subscription(db: Session, user_id: int, sub: schemas.SubscriptionCrea
     return create_subscription(db, user_id, sub)
     
 
+# ADMIN CRUD
 
+def create_flagged_crime(db: Session, crime_id: int, flagged_by: int, reason: str, is_flagged: bool = True):
+    flagged = models.FlaggedCrime(
+        crime_id=crime_id,
+        flagged_by=flagged_by,
+        reason=reason,
+        is_flagged=is_flagged
+    )
+    db.add(flagged)
+    db.commit()
+    db.refresh(flagged)
+    return flagged
+
+# Get crime by ID
+def get_flagged_crime_by_id(db: Session, flagged_id: int):
+    return db.query(models.FlaggedCrime).filter(models.FlaggedCrime.id == flagged_id).first()
+
+# Get all flagged crimes
+def get_flagged_crimes(db: Session):
+    return db.query(models.FlaggedCrime).all()
+
+
+# create SOS alert
+def create_sos_alert(db: Session, user_id: int, sos: schemas.SOSCreate):
+    db_sos = models.SOSAlert(
+        user_id=user_id,
+        latitude=sos.latitude,
+        longitude=sos.longitude,
+        message=sos.message
+    )
+    db.add(db_sos)
+    db.commit()
+    db.refresh(db_sos)
+    return db_sos

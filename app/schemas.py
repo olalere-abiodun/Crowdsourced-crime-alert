@@ -12,12 +12,14 @@ class VoteEnum(str, Enum):
     down = "down"
 
 class UserBase(BaseModel):
-    # user_id: int
+    user_id: int
     username: str
     email: EmailStr
 
 
-class UserCreate(UserBase):
+class UserCreate(BaseModel):
+    username: str
+    email: EmailStr
     fullname: str
     password: str
     role: UserRole
@@ -109,5 +111,24 @@ class SubscriptionResponse(SubscriptionBase):
     id: int
     user_id: int
     created_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)
+
+class FlaggedCrimeBase(BaseModel):
+    reason: str = "No reason provided"
+    
+
+
+class FlaggedCrimeCreate(FlaggedCrimeBase):
+    is_flagged: bool = True
+
+
+class FlaggedCrimeOut(FlaggedCrimeBase):
+    id: int
+    crime_id: int
+    flagged_by: int
+    created_at: datetime
+    
+
 
     model_config = ConfigDict(from_attributes=True)
