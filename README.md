@@ -18,7 +18,7 @@ Built with **FastAPI**, **SQLAlchemy**, and **PostgreSQL**, this project allows 
 
 ## 📂 Project Structure
 
-![Directory Structure](directpry-structure.png)
+![Directory Structure](directory-structure.png)
 
 ---
 
