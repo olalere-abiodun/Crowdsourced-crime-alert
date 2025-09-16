@@ -11,7 +11,7 @@ from app.router import auth_utils
 
 router = APIRouter(prefix="/sos", tags=["SOS"])
 
-@router.post("/send", response_model=schemas.SOSResponse)
+@router.post("/send_sos", response_model=schemas.SOSResponse)
 def send_sos_alert(
     sos_request: schemas.SOSCreate,
     db: Session = Depends(get_db),
@@ -21,10 +21,10 @@ def send_sos_alert(
     return new_sos
 
 
-@router.get("/", response_model=List[schemas.SOSResponse])
+@router.get("/sos_alerts", response_model=List[schemas.SOSResponse])
 def get_all_sos_alerts(
     db: Session = Depends(get_db),
-    current_user: schemas.UserBase = Depends(auth_utils.get_current_user_optional)
+    current_user: schemas.UserBase = Depends(auth_utils.get_current_user)
 ):
     if current_user.role != "admin":
         raise HTTPException(
@@ -33,3 +33,5 @@ def get_all_sos_alerts(
         )
     sos_alerts = crud.get_all_sos_alerts(db)
     return sos_alerts
+
+

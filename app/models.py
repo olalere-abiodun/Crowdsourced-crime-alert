@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, Float, DateTime, ForeignKey, Boolean, UniqueConstraint
 from sqlalchemy.orm import relationship
-from datetime import datetime
+from datetime import datetime, UTC
 from .database import Base
 
 
@@ -13,7 +13,7 @@ class Users(Base):
     email = Column(String, unique=True, index=True, nullable=False)
     role = Column(String, nullable=False)
     hashed_password = Column(String, nullable=False)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(UTC))
 
     crimes = relationship("Crimes", back_populates="user")
     votes = relationship("Votes", back_populates="user")
@@ -32,8 +32,8 @@ class Crimes(Base):
     latitude = Column(Float, nullable=False)
     longitude = Column(Float, nullable=False)
     media_url = Column(String, nullable=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(UTC))
+    updated_at = Column(DateTime, default=lambda: datetime.now(UTC), onupdate=lambda: datetime.now(UTC))
 
     user = relationship("Users", back_populates="crimes")
     votes = relationship("Votes", back_populates="crime", cascade="all, delete-orphan")
@@ -48,7 +48,7 @@ class Votes(Base):
     crime_id = Column(Integer, ForeignKey("crimes.crime_id"), nullable=False)
     user_id = Column(Integer, ForeignKey("users.user_id"), nullable=False)
     vote_type = Column(String, nullable=False)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(UTC))
 
     __table_args__ = (
         UniqueConstraint("crime_id", "user_id", name="unique_user_vote"),
@@ -65,7 +65,7 @@ class AnonymousVotes(Base):
     crime_id = Column(Integer, ForeignKey("crimes.crime_id", ondelete="CASCADE"), nullable=False)
     ip_address = Column(String, nullable=False)
     vote_type = Column(String, nullable=False)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(UTC))
     
 
     __table_args__ = (
@@ -84,7 +84,7 @@ class Subscription(Base):
     longitude = Column(Float, nullable=False)
     radius = Column(Float, nullable=False)
     is_active = Column(Boolean, default=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(UTC))
 
     user = relationship("Users", back_populates="subscriptions")
 
@@ -96,12 +96,12 @@ class FlaggedCrime(Base):
     flagged_by = Column(Integer, ForeignKey("users.user_id"))
     reason = Column(String, default="No reason provided")
     is_flagged = Column(Boolean, default=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(UTC))
 
     # relationships
     crime = relationship("Crimes", back_populates="flags")
-    admin = relationship("Users", back_populates="crimes")
-    
+    admin = relationship("Users", back_populates="flagged_crimes") 
+
 
 class SOSAlerts(Base):
     __tablename__ = "sos_alerts"
@@ -111,6 +111,6 @@ class SOSAlerts(Base):
     message = Column(String, nullable=False)
     latitude = Column(Float, nullable=False)
     longitude = Column(Float, nullable=False)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(UTC))
 
     user = relationship("Users", back_populates="sos_alerts")

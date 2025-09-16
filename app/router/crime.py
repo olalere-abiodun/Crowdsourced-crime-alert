@@ -47,7 +47,7 @@ def create_crime(
 
 # get all crime and filter by long anf lat
 
-@router.get("/", response_model=List[schemas.CrimeResponse])
+@router.get("/crime", response_model=List[schemas.CrimeResponse])
 def get_crimes(
     crime_type: Optional[str] = Query(None, description="Filter by crime type"),
     radius: Optional[float] = Query(None, description="Radius in km"),
@@ -72,7 +72,7 @@ def get_crimes(
 
     return crimes
 
-@router.get("/{crime_id}", response_model=schemas.CrimeResponse)
+@router.get("/crime/{crime_id}", response_model=schemas.CrimeResponse)
 def get_crime(crime_id: int, db: Session = Depends(get_db)):
     crime = crud.get_crime_by_id(db, crime_id)
     if not crime:
@@ -100,7 +100,7 @@ def update_crime(crime_id: int, crime: schemas.CrimeUpdate, db: Session = Depend
     return db_crime
 
 
-@router.delete("/{crime_id}")
+@router.delete("/crime/{crime_id}")
 def delete_crime(crime_id: int, db: Session = Depends(get_db), current_user: schemas.UserBase = Depends(auth_utils.get_current_user)):
     db_crime = crud.get_crime_by_id(db, crime_id)
 

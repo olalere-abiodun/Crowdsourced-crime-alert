@@ -11,7 +11,7 @@ from sqlalchemy import func
 
 router = APIRouter(prefix="/admin", tags=["Admin"])
 
-@router.post("/admin/crimes/{crime_id}/flag", response_model=schemas.FlaggedCrimeOut)
+@router.post("/crime/{crime_id}/flag", response_model=schemas.FlaggedCrimeOut)
 def flag_crime(
     crime_id: int,
     flag: schemas.FlaggedCrimeCreate,
@@ -37,34 +37,38 @@ def flag_crime(
 
     return flagged
 
-@router.get("/admin/crimes/flagged", response_model=List[schemas.FlaggedCrimeOut])
+@router.get("/crimes/flagged", response_model=List[schemas.FlaggedCrimeOut])
 def get_flagged_crimes(
     db: Session = Depends(get_db),
     current_user: schemas.UserBase = Depends(auth_utils.get_current_user),
 ):
-    if current_user.role != "admin":
-        raise HTTPException(status_code=403, detail="Admins only")
+    # if current_user.role != "admin":
+    #     raise HTTPException(status_code=403, detail="Admins only")
 
     flagged_crimes = crud.get_flagged_crimes(db)
     return flagged_crimes
 
 
-@router.get("/admin/statistics")
+
+# to start today 
+
+@router.get("/statistics")
 def get_statistics(
     db: Session = Depends(get_db),
     current_user: schemas.UserBase = Depends(auth_utils.get_current_user)
 ):
+    
     if current_user.role != "admin":
         raise HTTPException(status_code=403, detail="Admins only")
 
     # total reports
-    total_reports = db.query(func.count(models.Crime.crime_id)).scalar()
+    total_reports = db.query(func.count(models.Crimes.crime_id)).scalar()
 
     # top crime types
     top_types = (
-        db.query(models.Crime.crime_type, func.count(models.Crime.crime_id))
-        .group_by(models.Crime.crime_type)
-        .order_by(func.count(models.Crime.crime_id).desc())
+        db.query(models.Crimes.crime_type, func.count(models.Crimes.crime_id))
+        .group_by(models.Crimes.crime_type)
+        .order_by(func.count(models.Crimes.crime_id).desc())
         .limit(5)
         .all()
     )
@@ -72,12 +76,12 @@ def get_statistics(
     # hotspots (group by lat/long)
     hotspots = (
         db.query(
-            models.Crime.latitude,
-            models.Crime.longitude,
-            func.count(models.Crime.crime_id).label("crime_count")
+            models.Crimes.latitude,
+            models.Crimes.longitude,
+            func.count(models.Crimes.crime_id).label("crime_count")
         )
-        .group_by(models.Crime.latitude, models.Crime.longitude)
-        .order_by(func.count(models.Crime.crime_id).desc())
+        .group_by(models.Crimes.latitude, models.Crimes.longitude)
+        .order_by(func.count(models.Crimes.crime_id).desc())
         .limit(5)
         .all()
     )
